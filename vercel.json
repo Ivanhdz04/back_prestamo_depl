@@ -2,12 +2,12 @@
   "version": 2,
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "dist/**",
+      "memory": 1024
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
