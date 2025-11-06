@@ -34,11 +34,10 @@ import { UsersModule } from './users/users.module';
         const database = configService.get<string>('DB_NAME', '');
         const stage = configService.get<string>('STAGE', 'dev');
         
-        // SSL configuration - Azure PostgreSQL and remote hosts require SSL
+        // SSL configuration - Remote hosts require SSL
         const dbSsl = configService.get<string>('DB_SSL', 'false');
-        const isAzure = host.includes('database.azure.com');
         const isRemote = !['localhost', '127.0.0.1'].includes(host);
-        const sslEnabled = dbSsl === 'true' || stage === 'prod' || isAzure || isRemote;
+        const sslEnabled = dbSsl === 'true' || stage === 'prod' || isRemote;
 
         return {
           type: 'postgres' as const,
