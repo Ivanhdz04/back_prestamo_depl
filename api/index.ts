@@ -8,17 +8,22 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
 
-// Determine base URL - in Vercel it might be different
+// In Vercel, __dirname points to /var/task/api
+// We need to find where dist/ is located
 const possibleBaseUrls = [
-  resolve(__dirname, '..'),  // Standard: api/ -> root
-  resolve(__dirname, '../..'), // If api is nested
+  resolve(__dirname, '..'),  // /var/task
   process.cwd(),              // Current working directory
 ];
 
 let baseUrl = possibleBaseUrls[0];
+let distPath = '';
+
+// Find where dist/app.module.js actually is
 for (const url of possibleBaseUrls) {
-  if (existsSync(join(url, 'dist', 'app.module.js')) || existsSync(join(url, 'dist', 'app.module.ts'))) {
+  const testPath = join(url, 'dist', 'app.module.js');
+  if (existsSync(testPath)) {
     baseUrl = url;
+    distPath = join(url, 'dist');
     break;
   }
 }
@@ -31,27 +36,17 @@ register({
   }
 });
 
-// Import AppModule - try multiple possible paths
+// Import AppModule from dist (compiled code)
 let AppModule: any;
-const possiblePaths = [
-  join(baseUrl, 'dist', 'app.module'),
-  join(baseUrl, 'src', 'app.module'),
-  '../dist/app.module',
-  '../src/app.module',
-];
-
-for (const modulePath of possiblePaths) {
+if (distPath) {
+  AppModule = require(join(distPath, 'app.module')).AppModule;
+} else {
+  // Fallback: try relative path
   try {
-    const module = require.resolve(modulePath);
-    AppModule = require(module).AppModule;
-    break;
+    AppModule = require('../dist/app.module').AppModule;
   } catch (e) {
-    // Continue to next path
+    throw new Error(`Could not find AppModule. Base: ${baseUrl}, Dist: ${distPath}, __dirname: ${__dirname}, cwd: ${process.cwd()}`);
   }
-}
-
-if (!AppModule) {
-  throw new Error('Could not find AppModule. Tried paths: ' + possiblePaths.join(', '));
 }
 
 let cachedApp: express.Express;
