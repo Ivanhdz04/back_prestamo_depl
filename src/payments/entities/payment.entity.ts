@@ -1,10 +1,11 @@
 import { Loan } from "src/loans/entities/loan.entity";
 import { PaymentMethod } from "src/payment_methods/entities/payment_method.entity";
-import { AfterUpdate, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class Payment {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     idpayment: string;
 
     @Column('numeric')
@@ -30,6 +31,13 @@ export class Payment {
 
     @ManyToOne(() => PaymentMethod, payMethod => payMethod.payments)
     payment_method: PaymentMethod;
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.idpayment) {
+            this.idpayment = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {

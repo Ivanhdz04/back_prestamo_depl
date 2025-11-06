@@ -1,9 +1,10 @@
 import { Payment } from "src/payments/entities/payment.entity";
-import { AfterUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class PaymentMethod {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     idpayment_method: string;
 
     @Column('character varying')
@@ -23,6 +24,13 @@ export class PaymentMethod {
 
     @OneToMany(() => Payment, pay => pay.payment_method)
     payments: Payment[];
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.idpayment_method) {
+            this.idpayment_method = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {

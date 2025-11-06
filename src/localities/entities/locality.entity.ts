@@ -1,10 +1,11 @@
 import { City } from "src/cities/entities/city.entity";
 import { Direction } from "src/directions/entities/direction.entity";
-import { AfterUpdate, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class Locality {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     idlocality: string;
 
     @Column('character varying')
@@ -27,6 +28,13 @@ export class Locality {
 
     @OneToMany(() => Direction, dir => dir.locality)
     directions: Direction[]
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.idlocality) {
+            this.idlocality = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {

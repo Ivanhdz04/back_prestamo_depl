@@ -1,9 +1,10 @@
 import { Loan } from "src/loans/entities/loan.entity";
-import { AfterUpdate, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, OneToOne, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class Contract {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     idcontract: string;
 
     @Column('text')
@@ -23,6 +24,13 @@ export class Contract {
 
     @OneToOne(() => Loan, loan => loan.contract)
     loan: Loan;
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.idcontract) {
+            this.idcontract = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {

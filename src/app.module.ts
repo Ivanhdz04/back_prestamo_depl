@@ -1,36 +1,60 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
-import { ConfigModule } from '@nestjs/config';
+
+// Feature modules
 import { AuthModule } from './auth/auth.module';
-import { StatesModule } from './states/states.module';
-import { MunicipalityModule } from './municipality/municipality.module';
 import { CitiesModule } from './cities/cities.module';
-import { LocalitiesModule } from './localities/localities.module';
-import { DirectionsModule } from './directions/directions.module';
 import { ClientsModule } from './clients/clients.module';
-import { LoansModule } from './loans/loans.module';
-import { PaymentsModule } from './payments/payments.module';
-import { PaymentMethodsModule } from './payment_methods/payment_methods.module';
 import { ContractsModule } from './contracts/contracts.module';
+import { DirectionsModule } from './directions/directions.module';
+import { LoansModule } from './loans/loans.module';
+import { LocalitiesModule } from './localities/localities.module';
+import { MunicipalityModule } from './municipality/municipality.module';
+import { PaymentMethodsModule } from './payment_methods/payment_methods.module';
+import { PaymentsModule } from './payments/payments.module';
 import { SeedModule } from './seed/seed.module';
+import { StatesModule } from './states/states.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      ssl: process.env.STAGE === 'prod' ? true : false,
-      extra: {
-        ssl: process.env.STAGE === 'prod' ? { rejectUnauthorized: false } : null,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        // Database configuration
+        const host = configService.get<string>('DB_HOST', 'localhost');
+        const port = configService.get<number>('DB_PORT', 5432);
+        const username = configService.get<string>('DB_USER', 'postgres');
+        const password = configService.get<string>('DB_PASSWORD', '');
+        const database = configService.get<string>('DB_NAME', '');
+        const stage = configService.get<string>('STAGE', 'dev');
+        
+        // SSL configuration - Azure PostgreSQL and remote hosts require SSL
+        const dbSsl = configService.get<string>('DB_SSL', 'false');
+        const isAzure = host.includes('database.azure.com');
+        const isRemote = !['localhost', '127.0.0.1'].includes(host);
+        const sslEnabled = dbSsl === 'true' || stage === 'prod' || isAzure || isRemote;
+
+        return {
+          type: 'postgres' as const,
+          host,
+          port,
+          username,
+          password,
+          database,
+          synchronize: stage !== 'prod', // Desactivar en producción por seguridad
+          autoLoadEntities: true,
+          ssl: sslEnabled,
+          extra: sslEnabled ? { 
+            ssl: { rejectUnauthorized: false } 
+          } : undefined,
+        };
       },
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT!,
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      synchronize: true,
-      autoLoadEntities: true
     }),
     UsersModule,
     AuthModule,
@@ -49,11 +73,3 @@ import { SeedModule } from './seed/seed.module';
 })
 
 export class AppModule {}
-
-// console.log(process.env.DB_PASSWORD,
-//   process.env.DB_USER,
-//   process.env.DB_NAME,
-//   process.env.DB_HOST,
-//   process.env.DB_PORT,
-//   process.env.STAGE
-// )

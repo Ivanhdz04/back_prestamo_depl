@@ -2,11 +2,12 @@ import { Client } from "src/clients/entities/client.entity";
 import { Contract } from "src/contracts/entities/contract.entity";
 import { Payment } from "src/payments/entities/payment.entity";
 import { User } from "src/users/entities/user.entity";
-import { AfterUpdate, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class Loan {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     idloan: string;
 
     @Column('numeric')
@@ -51,6 +52,13 @@ export class Loan {
     @OneToOne(() => Contract, con => con.loan)
     @JoinColumn()
     contract: Contract;
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.idloan) {
+            this.idloan = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {

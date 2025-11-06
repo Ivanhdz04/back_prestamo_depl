@@ -1,10 +1,11 @@
 import { Client } from "src/clients/entities/client.entity";
 import { Locality } from "src/localities/entities/locality.entity";
-import { AfterUpdate, Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class Direction {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     iddirection: string;
 
     @Column('character varying')
@@ -36,6 +37,13 @@ export class Direction {
 
     @OneToOne(() => Client, client => client.direction)
     client: Client;
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.iddirection) {
+            this.iddirection = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {

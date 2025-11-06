@@ -1,10 +1,11 @@
 import { Client } from "src/clients/entities/client.entity";
 import { Loan } from "src/loans/entities/loan.entity";
-import { AfterUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     iduser: string;
 
     @Column('character varying')
@@ -33,6 +34,13 @@ export class User {
 
     @OneToMany(() => Client, cli => cli.lender)
     clients: Client[];
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.iduser) {
+            this.iduser = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {

@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { AuthService } from 'src/auth/auth.service';
+import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -13,12 +15,14 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(createUserDto: CreateUserDto, userOrigin: User): Promise<User> {
     const user = this.userRepository.create({
       ...createUserDto,
-      userCreated: userOrigin.iduser
+      userCreated: userOrigin.iduser,
+      password: bcrypt.hashSync(createUserDto.password, +this.configService.get('SALT')),
     });
 
     return await this.userRepository.save(user);

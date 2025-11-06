@@ -1,9 +1,10 @@
 import { Municipality } from "src/municipality/entities/municipality.entity";
-import { AfterUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { AfterUpdate, BeforeInsert, Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { randomUUID } from "crypto";
 
 @Entity()
 export class State {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     idstate: string;
 
     @Column('character varying')
@@ -23,6 +24,13 @@ export class State {
 
     @OneToMany(() => Municipality, mun => mun.state)
     municipalities: Municipality[];
+
+    @BeforeInsert()
+    generateId() {
+        if (!this.idstate) {
+            this.idstate = randomUUID();
+        }
+    }
 
     @AfterUpdate()
     updatedDate() {
