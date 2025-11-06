@@ -15,6 +15,8 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
+  // hola mundo
+
   app.useGlobalPipes(
   new ValidationPipe({
     whitelist: true,
@@ -26,7 +28,7 @@ async function bootstrap() {
     .setTitle('Loans example')
     .setDescription('The Loans API description')
     .setVersion('1.0')
-    .addBearerAuth()
+    // .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
@@ -36,3 +38,4 @@ async function bootstrap() {
 
 }
 bootstrap();
+// 
