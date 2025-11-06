@@ -1,9 +1,20 @@
+import 'reflect-metadata';
+import { register } from 'tsconfig-paths';
+import { resolve } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../dist/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
+
+// Register path mappings for runtime - resolve src/* to dist/*
+register({
+  baseUrl: resolve(__dirname, '..'),
+  paths: {
+    'src/*': ['dist/*']
+  }
+});
 
 let cachedApp: express.Express;
 
