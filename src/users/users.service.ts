@@ -80,4 +80,19 @@ export class UsersService {
     return 'User updated successfully';
   }
 
+  async findLoansAmount() {
+    const users = await this.userRepository.find({
+      where: { status: true, loans: { status: true }},
+      relations: {
+        loans: true
+      }
+    });
+    
+    return users.map(user => ({
+      name: user.name,
+      loansAmount: user.loans.length
+    })).filter(i => i.loansAmount > 0);
+
+  }
+
 }

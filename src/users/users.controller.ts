@@ -21,6 +21,12 @@ export class UsersController {
     return {error: false, response: await this.usersService.create(createUserDto, user)};
   }
 
+  @Get('users-loans-amount')
+  @UseGuards(AuthGuard())
+  async findLoansAmount() {
+    return {error: false, response: await this.usersService.findLoansAmount()};
+  }
+
   @Get()
   @UseGuards(AuthGuard())
   @ApiResponse(FindAllUserResponse)
@@ -41,4 +47,5 @@ export class UsersController {
   async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
     return {error: false, response: await this.usersService.update(id, updateUserDto)};
   }
+
 }

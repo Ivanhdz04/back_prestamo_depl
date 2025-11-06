@@ -16,6 +16,18 @@ export class LoansController {
     return this.loansService.create(createLoanDto, user);
   }
 
+  @Get('loans-by-user/:id')
+  @UseGuards(AuthGuard())
+  findAllByUser(@Param('id', ParseUUIDPipe) id: string) {
+    return this.loansService.findAllByUser(id);
+  }
+
+  @Get('amount-loans-by-user/:id')
+  @UseGuards(AuthGuard())
+  findAmountByUser(@Param('id', ParseUUIDPipe) id: string) {
+    return this.loansService.findAmountByUser(id);
+  }
+
   @Get()
   @UseGuards(AuthGuard())
   findAll() {

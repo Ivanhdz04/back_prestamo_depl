@@ -98,4 +98,16 @@ export class LoansService {
     return 'Loan updated';
   }
 
+  findAllByUser(id: string): Promise<Loan[]> {
+    return this.loanRepository.find({
+      where: { status: true, lender: { iduser: id}}
+    })
+  }
+
+  findAmountByUser(id: string): Promise<number> {
+    return this.loanRepository.count({
+      where: { status: true, lender: { iduser: id}}
+    })
+  }
+
 }
